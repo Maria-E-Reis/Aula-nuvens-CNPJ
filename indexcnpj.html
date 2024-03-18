@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de CNPJ</title>
+    <style>
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label {
+            width: 100px;
+        }
+
+        .form-group input[type="text"] {
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .form-group button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    
+<script>
+function limpa_formulario_cnpj() {
+    document.getElementById('razaoSocial').value = "";
+    document.getElementById('nomeFantasia').value = "";
+    document.getElementById('logradouro').value = "";
+    document.getElementById('bairro').value = "";
+    document.getElementById('municipio').value = "";
+    document.getElementById('uf').value = "";
+    document.getElementById('cep').value = "";
+}
+
+function exibir_resultado_cnpj(data) {
+    if (data.status === "OK") {
+        document.getElementById('razaoSocial').value = data.nome;
+        document.getElementById('nomeFantasia').value = data.fantasia;
+        document.getElementById('logradouro').value = data.logradouro;
+        document.getElementById('bairro').value = data.bairro;
+        document.getElementById('municipio').value = data.municipio;
+        document.getElementById('uf').value = data.uf;
+        document.getElementById('cep').value = data.cep;
+    } else {
+        limpa_formulario_cnpj();
+        alert("CNPJ não encontrado.");
+    }
+}
+        
+function pesquisar_cnpj(cnpj) {
+    var url = 'https://cors-anywhere.herokuapp.com/https://www.receitaws.com.br/v1/cnpj/' + cnpj;
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao obter informações do CNPJ. Código do status: ' + response.status);
+            }
+            return response.text(); 
+        })
+        .then(data => {
+            if (data.trim().length > 0) {
+                try {
+                    const jsonData = JSON.parse(data);
+                    exibir_resultado_cnpj(jsonData);
+                } catch (error) {
+                    console.error('Erro ao analisar resposta JSON:', error);
+                    alert("Erro ao obter informações do CNPJ. Por favor, tente novamente mais tarde.");
+                }
+            } else {
+                console.error('Resposta vazia ou inválida.');
+                alert("Erro ao obter informações do CNPJ. Resposta vazia ou inválida.");
+            }
+        })
+        .catch(error => {
+            console.error('Erro na solicitação:', error);
+            alert("Erro ao obter informações do CNPJ. Por favor, tente novamente mais tarde.");
+        });
+}
+</script>
+
+<div class="form-container">
+    <div class="form-group">
+        <label for="cnpj">CNPJ:</label>
+        <input name="cnpj" type="text" id="cnpj" value="" size="14" maxlength="20"/>
+        <button type="button" onclick="pesquisar_cnpj(document.getElementById('cnpj').value)">Buscar CNPJ</button>
+    </div>
+
+    <div class="form-group">
+        <label for="razaoSocial">Razão Social:</label>
+        <input name="razaoSocial" type="text" id="razaoSocial" size="60" />
+    </div>
+
+    <div class="form-group">
+        <label for="nomeFantasia">Nome Fantasia:</label>
+        <input name="nomeFantasia" type="text" id="nomeFantasia" size="40" />
+    </div>
+
+    <div class="form-group">
+        <label for="logradouro">Logradouro:</label>
+        <input name="logradouro" type="text" id="logradouro" size="60" />
+    </div>
+
+    <div class="form-group">
+        <label for="bairro">Bairro:</label>
+        <input name="bairro" type="text" id="bairro" size="40" />
+    </div>
+
+    <div class="form-group">
+        <label for="municipio">Município:</label>
+        <input name="municipio" type="text" id="municipio" size="40" />
+    </div>
+
+    <div class="form-group">
+        <label for="uf">UF:</label>
+        <input name="uf" type="text" id="uf" size="2" />
+    </div>
+
+    <div class="form-group">
+        <label for="cep">CEP:</label>
+        <input name="cep" type="text" id="cep" size="10" maxlength="12" />
+    </div>
+</div>
+
+</body>
+</html>
